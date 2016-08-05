@@ -21,7 +21,7 @@ namespace SafeWpf
     public partial class MainWindow : Window
     {
         private Button[,] buttons;
-        private Image[] levers = new Image[2];
+        private Color[] col = new Color[2];
 
         private int fieldSize;
         Random rnd = new Random();
@@ -33,8 +33,8 @@ namespace SafeWpf
         public MainWindow()
         {
             InitializeComponent();
-            levers[0] = new Image { Source = new BitmapImage(new Uri("/Resources/Hor.png", UriKind.Relative)) };
-            levers[1] = new Image { Source = new BitmapImage(new Uri("/Resources/Vert.png", UriKind.Relative)) };
+            col[0] = Colors.Red;
+            col[1] = Colors.Green;
 
             this.textBox.PreviewTextInput += new TextCompositionEventHandler(textBox_PreviewTextInput);
 
@@ -76,7 +76,8 @@ namespace SafeWpf
                     buttons[i, j].Margin = new Thickness(i*50, j*50, 0, 0);
                     buttons[i, j].Width = 50;
                     buttons[i, j].Height = 50;
-                    buttons[i, j].Content = ID[i,j];
+                    buttons[i, j].Background = new SolidColorBrush(col[ID[i,j]]);
+                    buttons[i, j].Content =ID[i, j];
                     buttons[i, j].VerticalAlignment = VerticalAlignment.Top;
                     buttons[i, j].HorizontalAlignment = HorizontalAlignment.Left;
 
@@ -91,17 +92,20 @@ namespace SafeWpf
 
         void Clicks (object sender, RoutedEventArgs e)
         {
-            flip(((Button)sender));
-        }
+            int j = (int)((Button)sender).Margin.Top / (int)((Button)sender).Height;
+            int i = (int)((Button)sender).Margin.Left / (int)((Button)sender).Width;
+            //flip(i, j);
 
-        //Функция смены ручки
-        void flip(Button btn)
-        {
-            int j = (int)btn.Margin.Top / (int)btn.Height;
-            int i = (int)btn.Margin.Left / (int)btn.Width;
-            int newID = 1 - ID[i, j];
-            ID[i, j] = newID;
-            btn.Content = ID[i, j];
+            for (countI = 0; countI < fieldSize; countI++)
+            {
+                flip(countI, j);
+            }
+            for (countJ = 0; countJ < fieldSize; countJ++)
+            {
+                if (countJ != j)
+                    flip(i, countJ);
+            } 
+
             Console.WriteLine();
             for (i = 0; i < fieldSize; i++)
             {
@@ -113,6 +117,17 @@ namespace SafeWpf
                 }
                 Console.WriteLine();
             }
+        }
+
+        //Функция смены ручки
+        void flip(int i, int j)
+        {
+            
+            int newID = 1 - ID[i, j];
+            ID[i, j] = newID;
+            buttons[i, j].Background = new SolidColorBrush(col[ID[i, j]]);
+            buttons[i, j].Content = ID[i, j];
+
         }
 
         void GetRandomField()
