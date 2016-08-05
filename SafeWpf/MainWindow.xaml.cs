@@ -39,24 +39,33 @@ namespace SafeWpf
             this.textBox.PreviewTextInput += new TextCompositionEventHandler(textBox_PreviewTextInput);
 
         }
+
+        //Ограничение ввода только цифр
         void textBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
                 if (!Char.IsDigit(e.Text, 0)) e.Handled = true;
         }
 
-
+        //Кнопка старта
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            if (buttons != null)
-                for (int i = 0; i < fieldSize; i++)
-                    for (int j = 0; j < fieldSize; j++)
-                    {
-                        MainGrid.Children.Remove(buttons[i, j]);
-                    }
+            if (!(Convert.ToInt32(textBox.Text) > 10))
+            {
+                if (buttons != null)
+                    for (int i = 0; i < fieldSize; i++)
+                        for (int j = 0; j < fieldSize; j++)
+                        {
+                            MainGrid.Children.Remove(buttons[i, j]);
+                        }
 
-                        CreateButtons();
+                CreateButtons();
+            }
+            else
+                MessageBox.Show("Максимальная сторона = 10");
+            
         }
 
+        //Создание игрового поля
         private void CreateButtons()
         {
             fieldSize = Convert.ToInt32(textBox.Text);
@@ -65,9 +74,6 @@ namespace SafeWpf
             int columnCount = 0;
             bool isEven = false;
 
-            //Creating field of game
-
-            //GetRandomField();
 
             for (int i = 0; i < fieldSize; i++)
                 for (int j = 0; j < fieldSize; j++)
@@ -171,6 +177,7 @@ namespace SafeWpf
 
                 }
 
+        //Поворот крестом
         void Clicks (object sender, RoutedEventArgs e)
         {
             int j = (int)((Button)sender).Margin.Top / (int)((Button)sender).Height;
@@ -202,7 +209,7 @@ namespace SafeWpf
             checkWin();
         }
 
-        //Функция смены ручки
+        //Функция смены положения
         void flip(int i, int j)
         {
             
@@ -213,24 +220,7 @@ namespace SafeWpf
 
         }
 
-        void GetRandomField()
-        {
-            for (int i = 0; i < fieldSize; i++)
-                for (int j = 0; j < fieldSize; j++)
-                {
-                    ID[i, j] = rnd.Next(0, 2);
-                }
-        }
-
-        private void btn_MouseClick (object sender, MouseEventArgs e)
-        {
-            var relativePosition = e.GetPosition(this);
-            var point = PointToScreen(relativePosition);
-            int j = (int)point.Y / 50;
-            int i = (int)point.X / 50;
-            Console.WriteLine("Button" + i + j);
-        }
-
+        //Проверка победы
         private bool checkWin()
         {
             int prevI = 0;
@@ -249,11 +239,6 @@ namespace SafeWpf
             MessageBox.Show("WON!");
             return true;
 
-        }
-
-        private void textBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-           
         }
     }
 }
