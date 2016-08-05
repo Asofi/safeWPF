@@ -44,15 +44,17 @@ namespace SafeWpf
                 if (!Char.IsDigit(e.Text, 0)) e.Handled = true;
         }
 
-        private void MouseCordinateMethod(object sender, MouseEventArgs e)
-        {
-            var relativePosition = e.GetPosition(this);
-            var point = PointToScreen(relativePosition);
-        }
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            CreateButtons();
+            if (buttons != null)
+                for (int i = 0; i < fieldSize; i++)
+                    for (int j = 0; j < fieldSize; j++)
+                    {
+                        MainGrid.Children.Remove(buttons[i, j]);
+                    }
+
+                        CreateButtons();
         }
 
         private void CreateButtons()
@@ -65,30 +67,109 @@ namespace SafeWpf
 
             //Creating field of game
 
-            GetRandomField();
+            //GetRandomField();
 
             for (int i = 0; i < fieldSize; i++)
-            {
-
                 for (int j = 0; j < fieldSize; j++)
                 {
                     buttons[i, j] = new Button();
-                    buttons[i, j].Margin = new Thickness(i*50, j*50, 0, 0);
+                    buttons[i, j].Margin = new Thickness(i * 50, j * 50, 0, 0);
                     buttons[i, j].Width = 50;
                     buttons[i, j].Height = 50;
-                    buttons[i, j].Background = new SolidColorBrush(col[ID[i,j]]);
-                    buttons[i, j].Content =ID[i, j];
+                    buttons[i, j].Background = new SolidColorBrush(col[ID[i, j]]);
+                    buttons[i, j].Content = ID[i, j];
                     buttons[i, j].VerticalAlignment = VerticalAlignment.Top;
                     buttons[i, j].HorizontalAlignment = HorizontalAlignment.Left;
 
                     buttons[i, j].Click += new RoutedEventHandler(Clicks);
                     MainGrid.Children.Add(buttons[i, j]);
-                    Console.Write("{0} ", ID[j, i]);
+                }
+                    ///////////////////////////////////////////////////////////////////
+
+                    if (fieldSize % 2 != 0)
+                    {
+                        for (int i = 0; i < fieldSize - 1; i++)
+                            for (int j = 0; j < fieldSize - 1; j++)
+                            {
+                                ID[i, j] = rnd.Next(0, 2);
+                                buttons[i, j].Background = new SolidColorBrush(col[ID[i, j]]);
+                                buttons[i, j].Content = ID[i, j];
+
+                                if (i == 0 && ID[i, j] == 1)
+                                    columnCount += 1;
+
+                                if (columnCount % 2 == 0)
+                                    isEven = true;
+                                else
+                                    isEven = false;
+                            }
+
+                        //Создается последняя строка на основании четности каждого столба
+                        for (int i = 0; i < fieldSize; i++)
+                        {
+                            columnCount = 0;
+                            for (int j = 0; j < fieldSize - 1; j++)
+                            {
+                                if (ID[i, j] == 1)
+                                    columnCount += 1;
+                            }
+                            if (columnCount % 2 == 0)
+                            {
+                                if (isEven)
+                                    ID[i, fieldSize - 1] = 0;
+                                else
+                                    ID[i, fieldSize - 1] = 1;
+                            }
+                            else
+                            {
+                                if (isEven)
+                                    ID[i, fieldSize - 1] = 1;
+                                else
+                                    ID[i, fieldSize - 1] = 0;
+                            }
+                            buttons[i, fieldSize - 1].Background = new SolidColorBrush(col[ID[i, fieldSize - 1]]);
+                            buttons[i, fieldSize - 1].Content = ID[i, fieldSize - 1];
+                    }
+
+                        ////Создается последний столбец на основании четности каждой строки
+                        for (int j = 0; j < fieldSize; j++)
+                        {
+                            columnCount = 0;
+                            for (int i = 0; i < fieldSize - 1; i++)
+                            {
+                                if (ID[i, j] == 1)
+                                    columnCount += 1;
+                            }
+                            if (columnCount % 2 == 0)
+                            {
+                                if (isEven)
+                                    ID[fieldSize - 1, j] = 0;
+                                else
+                                    ID[fieldSize - 1, j] = 1;
+                            }
+                            else
+                            {
+                                if (isEven)
+                                    ID[fieldSize - 1, j] = 1;
+                                else
+                                    ID[fieldSize - 1, j] = 0;
+                            }
+                            buttons[fieldSize - 1, j].Background = new SolidColorBrush(col[ID[fieldSize - 1, j]]);
+                            buttons[fieldSize - 1, j].Content = ID[fieldSize - 1, j];
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < fieldSize; i++)
+                            for (int j = 0; j < fieldSize; j++)
+                            {
+                                ID[i, j] = rnd.Next(0, 2);
+                                buttons[i, j].Background = new SolidColorBrush(col[ID[i, j]]);
+                                buttons[i, j].Content = ID[i, j];
+                            }
+                    }
 
                 }
-                Console.WriteLine();
-            }
-        } 
 
         void Clicks (object sender, RoutedEventArgs e)
         {
@@ -117,6 +198,8 @@ namespace SafeWpf
                 }
                 Console.WriteLine();
             }
+
+            checkWin();
         }
 
         //Функция смены ручки
@@ -146,6 +229,26 @@ namespace SafeWpf
             int j = (int)point.Y / 50;
             int i = (int)point.X / 50;
             Console.WriteLine("Button" + i + j);
+        }
+
+        private bool checkWin()
+        {
+            int prevI = 0;
+            int prevJ = 0;
+            for (int i = 0; i < fieldSize; i++)
+            {
+                for (int j = 1; j < fieldSize; j++)
+                {
+                    if (ID[i, j] != ID[prevI, prevJ])
+                        return false;
+                    prevI = i;
+                    prevJ = j;
+                }
+            }
+
+            MessageBox.Show("WON!");
+            return true;
+
         }
 
         private void textBox_TextChanged(object sender, TextChangedEventArgs e)
